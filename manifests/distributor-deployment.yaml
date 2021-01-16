@@ -1,0 +1,36 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: distributor
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: distributor
+  template:
+    metadata:
+      labels:
+        name: distributor
+    spec:
+      containers:
+      - name: distributor
+        image: quay.io/cortexproject/cortex:v1.6.0
+        imagePullPolicy: IfNotPresent
+        args:
+        - -target=distributor
+        - -config.file=/etc/cortex/config.yaml
+        - -log.level=debug
+        ports:
+        - containerPort: 80
+        resources:
+          requests:
+            memory: "100Mi"
+            cpu: 0.01
+        volumeMounts:
+          - name: config-volume
+            mountPath: /etc/cortex
+      volumes:
+      - name: config-volume
+        configMap:
+          name: cortex

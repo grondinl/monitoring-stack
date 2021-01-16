@@ -1,0 +1,91 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cortex
+data:
+  config.yaml: |
+    auth_enabled: false
+    server:
+      http_listen_port: 80
+
+      # Configure the server to allow messages up to 100MB.
+      grpc_server_max_recv_msg_size: 104857600
+      grpc_server_max_send_msg_size: 104857600
+      grpc_server_max_concurrent_streams: 1000
+
+    distributor:
+      shard_by_all_labels: true
+      pool:
+        health_check_ingesters: true
+      ring:
+        kvstore:
+          store: consul
+          consul: 
+              host: consul.default.svc.cluster.local:8500
+
+    ingester_client:
+      grpc_client_config:
+        # Configure the client to allow messages up to 100MB.
+        max_recv_msg_size: 104857600
+        max_send_msg_size: 104857600
+        grpc_compression: gzip
+
+    ingester:
+      lifecycler:
+      # We want to start immediately and flush on shutdown.
+        join_after: 0
+        min_ready_duration: 0s
+        final_sleep: 0s
+        num_tokens: 512
+
+      # Use an in memory ring store, so we don't need to launch a Consul.
+        ring:
+          kvstore:
+            store: consul
+            consul: 
+                host: consul.default.svc.cluster.local:8500
+          replication_factor: 1
+      
+    store_gateway:
+      sharding_enabled: true
+      sharding_ring:
+        kvstore:
+          store: consul
+          consul: 
+            host: consul.default.svc.cluster.local:8500
+
+    storage:
+      engine: blocks
+
+    blocks_storage:
+      tsdb:
+        dir: tsdb
+
+      bucket_store:
+        sync_dir: tsdb-sync
+
+      backend: gcs 
+
+      gcs:
+        bucket_name: cortex
+        service_account: "" # if empty or omitted Cortex will use your default service account as per Google's fallback logic
+
+    compactor:
+      sharding_enabled: true
+      data_dir: compactor
+      sharding_ring:
+        kvstore:
+          store: consul
+          consul: 
+              host: consul.default.svc.cluster.local:8500
+
+    # frontend_worker:
+    #   match_max_concurrent: true
+
+    # ruler:
+    #   enable_api: true
+    #   enable_sharding: false
+    #   storage:
+    #     type: local
+    #     local:
+    #       directory: /tmp/cortex/rules

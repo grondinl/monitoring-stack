@@ -1,0 +1,36 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: querier
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: querier
+  template:
+    metadata:
+      labels:
+        name: querier
+    spec:
+      containers:
+      - name: querier
+        image: quay.io/cortexproject/cortex:v1.6.0
+        imagePullPolicy: IfNotPresent
+        args:
+        - -target=querier
+        - -config.file=/etc/cortex/config.yaml
+        - -consul.hostname=consul.default.svc.cluster.local:8500
+        ports:
+        - containerPort: 80
+        resources:
+          requests:
+            memory: "100Mi"
+            cpu: 0.01
+        volumeMounts:
+          - name: config-volume
+            mountPath: /etc/cortex
+      volumes:
+      - name: config-volume
+        configMap:
+          name: cortex
