@@ -1,0 +1,14 @@
+apiVersion: monitoring.coreos.com/v1
+kind: Prometheus
+metadata:
+  name: cortex
+  labels:
+    app: cortex
+spec:
+  replicas: 2
+  serviceAccountName: prometheus
+  serviceMonitorSelector:
+    matchLabels:
+      app: cortex
+  remoteWrite:
+  - url: http://nginx.default.svc.cluster.local:80/api/v1/push

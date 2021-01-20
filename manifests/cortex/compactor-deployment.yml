@@ -2,23 +2,25 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: store-gateway
+  name: compactor
 spec:
   replicas: 1
   selector:
     matchLabels:
-      name: store-gateway
+      app: cortex
+      module: compactor
   template:
     metadata:
       labels:
-        name: store-gateway
+        app: cortex
+        module: compactor
     spec:
       containers:
-      - name: store-gateway
+      - name: compactor
         image: quay.io/cortexproject/cortex:v1.6.0
         imagePullPolicy: IfNotPresent
         args:
-        - -target=store-gateway
+        - -target=compactor
         - -config.file=/etc/cortex/config.yaml
         env:
           - name:  GOOGLE_APPLICATION_CREDENTIALS
@@ -28,7 +30,7 @@ spec:
         resources:
           requests:
             memory: "100Mi"
-            cpu: 0.01
+            cpu: "0.01"
         volumeMounts:
           - name: config-volume
             mountPath: /etc/cortex

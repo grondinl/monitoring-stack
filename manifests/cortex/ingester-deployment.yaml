@@ -2,35 +2,44 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: querier
+  name: ingester
 spec:
   replicas: 1
   selector:
     matchLabels:
-      name: querier
+      app: cortex
+      module: ingester
   template:
     metadata:
       labels:
-        name: querier
+        app: cortex
+        module: ingester
     spec:
       containers:
-      - name: querier
+      - name: ingester
         image: quay.io/cortexproject/cortex:v1.6.0
         imagePullPolicy: IfNotPresent
         args:
-        - -target=querier
+        - -target=ingester
         - -config.file=/etc/cortex/config.yaml
-        - -consul.hostname=consul.default.svc.cluster.local:8500
+        env:
+          - name:  GOOGLE_APPLICATION_CREDENTIALS
+            value: "/var/run/cortex/secrets/gcs_cortex.json"
         ports:
         - containerPort: 80
         resources:
           requests:
             memory: "100Mi"
-            cpu: 0.01
+            cpu: "0.01"
         volumeMounts:
           - name: config-volume
             mountPath: /etc/cortex
+          - name: secret-volume
+            mountPath: /var/run/cortex/secrets 
       volumes:
       - name: config-volume
         configMap:
           name: cortex
+      - name: secret-volume
+        secret:
+          secretName: gcs-cortex

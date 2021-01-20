@@ -2,27 +2,27 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: compactor
+  name: querier
 spec:
   replicas: 1
   selector:
     matchLabels:
-      name: compactor
+      app: cortex
+      module: querier
   template:
     metadata:
       labels:
-        name: compactor
+        app: cortex
+        module: querier
     spec:
       containers:
-      - name: compactor
+      - name: querier
         image: quay.io/cortexproject/cortex:v1.6.0
         imagePullPolicy: IfNotPresent
         args:
-        - -target=compactor
+        - -target=querier
         - -config.file=/etc/cortex/config.yaml
-        env:
-          - name:  GOOGLE_APPLICATION_CREDENTIALS
-            value: "/var/run/cortex/secrets/gcs_cortex.json"
+        - -consul.hostname=consul.default.svc.cluster.local:8500
         ports:
         - containerPort: 80
         resources:
@@ -32,13 +32,7 @@ spec:
         volumeMounts:
           - name: config-volume
             mountPath: /etc/cortex
-          - name: secret-volume
-            mountPath: /var/run/cortex/secrets 
       volumes:
       - name: config-volume
         configMap:
           name: cortex
-      - name: secret-volume
-        secret:
-          secretName: gcs-cortex
-        

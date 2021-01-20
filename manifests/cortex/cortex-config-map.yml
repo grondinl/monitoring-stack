@@ -4,7 +4,7 @@ metadata:
   name: cortex
 data:
   config.yaml: |
-    auth_enabled: false
+    # auth_enabled: false
     server:
       http_listen_port: 80
 
@@ -38,7 +38,6 @@ data:
         final_sleep: 0s
         num_tokens: 512
 
-      # Use an in memory ring store, so we don't need to launch a Consul.
         ring:
           kvstore:
             store: consul
@@ -58,12 +57,6 @@ data:
       engine: blocks
 
     blocks_storage:
-      tsdb:
-        dir: tsdb
-
-      bucket_store:
-        sync_dir: tsdb-sync
-
       backend: gcs 
 
       gcs:

@@ -1,12 +1,12 @@
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
-  name: example-app
+  name: cortex
   labels:
-    team: frontend
+    app: cortex
 spec:
   selector:
     matchLabels:
-      app: example-app
+      app: cortex
   endpoints:
-  - port: web
+  - port: cortex  

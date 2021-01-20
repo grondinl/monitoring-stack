@@ -2,35 +2,34 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: distributor
+  name: query-frontend
 spec:
   replicas: 1
   selector:
     matchLabels:
-      name: distributor
+      app: cortex
+      module: query-frontend
   template:
     metadata:
       labels:
-        name: distributor
+        app: cortex
+        module: query-frontend
     spec:
       containers:
-      - name: distributor
+      - name: query-frontend
         image: quay.io/cortexproject/cortex:v1.6.0
         imagePullPolicy: IfNotPresent
         args:
-        - -target=distributor
-        - -config.file=/etc/cortex/config.yaml
+        - -target=query-frontend
         - -log.level=debug
+        - -server.http-listen-port=80
+        - -server.grpc-listen-port=9095
         ports:
+        - containerPort: 9095
+          name: grpc
         - containerPort: 80
+          name: http
         resources:
           requests:
             memory: "100Mi"
-            cpu: 0.01
-        volumeMounts:
-          - name: config-volume
-            mountPath: /etc/cortex
-      volumes:
-      - name: config-volume
-        configMap:
-          name: cortex
+            cpu: "0.01"
