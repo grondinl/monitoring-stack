@@ -59,6 +59,17 @@ data:
     blocks_storage:
       backend: gcs 
 
+      bucket_store:
+        chunks_cache:
+          backend: "memcached"
+          memcached:
+            addresses: "10.41.0.4:11211"
+
+        metadata_cache:
+          backend: "memcached"
+          memcached:
+            addresses: "10.41.0.4:11211"
+
       gcs:
         bucket_name: cortex
         service_account: "" # if empty or omitted Cortex will use your default service account as per Google's fallback logic
@@ -72,8 +83,9 @@ data:
           consul: 
               host: consul.default.svc.cluster.local:8500
 
-    # frontend_worker:
-    #   match_max_concurrent: true
+    frontend_worker:
+      frontend_address: "query-frontend.default.svc.cluster.local:9095"
+      match_max_concurrent: true
 
     # ruler:
     #   enable_api: true

@@ -4,7 +4,7 @@ kind: Deployment
 metadata:
   name: query-frontend
 spec:
-  replicas: 1
+  replicas: 2
   selector:
     matchLabels:
       app: cortex
@@ -21,15 +21,25 @@ spec:
         imagePullPolicy: IfNotPresent
         args:
         - -target=query-frontend
-        - -log.level=debug
-        - -server.http-listen-port=80
-        - -server.grpc-listen-port=9095
+        - -config.file=/etc/cortex/config.yaml
+        env:
+          - name:  GOOGLE_APPLICATION_CREDENTIALS
+            value: "/var/run/cortex/secrets/gcs_cortex.json"
         ports:
-        - containerPort: 9095
-          name: grpc
         - containerPort: 80
-          name: http
         resources:
           requests:
             memory: "100Mi"
             cpu: "0.01"
+        volumeMounts:
+          - name: config-volume
+            mountPath: /etc/cortex
+          - name: secret-volume
+            mountPath: /var/run/cortex/secrets 
+      volumes:
+      - name: config-volume
+        configMap:
+          name: cortex
+      - name: secret-volume
+        secret:
+          secretName: gcs-cortex

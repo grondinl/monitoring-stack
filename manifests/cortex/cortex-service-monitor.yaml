@@ -9,4 +9,4 @@ spec:
     matchLabels:
       app: cortex
   endpoints:
-  - port: cortex  
+  - port: http  

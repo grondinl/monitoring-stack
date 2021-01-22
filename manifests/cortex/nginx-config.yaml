@@ -32,8 +32,14 @@ data:
         location = /all_user_stats {
           proxy_pass      http://distributor.default.svc.cluster.local$request_uri;
         }
+        location = /compactor/.* {
+          proxy_pass      http://compactor.default.svc.cluster.local$request_uri;
+        }
+        location = /store-gateway/.*  {
+          proxy_pass      http://store-gateway.default.svc.cluster.local$request_uri;
+        }
         location ~ /prometheus/api/v1/.* {
-          proxy_pass      http://querier.default.svc.cluster.local$request_uri;
+          proxy_pass      http://query-frontend.default.svc.cluster.local$request_uri;
         }
       }
     }
