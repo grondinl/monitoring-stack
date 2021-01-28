@@ -22,7 +22,6 @@ spec:
         args:
         - -target=distributor
         - -config.file=/etc/cortex/config.yaml
-        - -log.level=debug
         ports:
         - containerPort: 80
         resources:

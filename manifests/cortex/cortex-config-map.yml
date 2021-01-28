@@ -4,7 +4,6 @@ metadata:
   name: cortex
 data:
   config.yaml: |
-    # auth_enabled: false
     server:
       http_listen_port: 80
 
@@ -12,8 +11,19 @@ data:
       grpc_server_max_recv_msg_size: 104857600
       grpc_server_max_send_msg_size: 104857600
       grpc_server_max_concurrent_streams: 1000
+      
+    limits:
+      accept_ha_samples: true
+      ha_cluster_label: prometheus
+      ha_replica_label: prometheus_replica
 
     distributor:
+      ha_tracker:
+        enable_ha_tracker: true
+        kvstore:
+          store: consul
+          consul: 
+            host: consul.default.svc.cluster.local:8500
       shard_by_all_labels: true
       pool:
         health_check_ingesters: true
