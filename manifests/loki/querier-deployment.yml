@@ -1,0 +1,45 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: querier-loki
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: loki
+      module: querier
+  template:
+    metadata:
+      labels:
+        app: loki
+        module: querier
+    spec:
+      containers:
+      - name: querier
+        image: grafana/loki:2.1.0
+        imagePullPolicy: IfNotPresent
+        args:
+        - -target=querier
+        - -config.file=/etc/loki/config.yaml
+        env:
+          - name:  GOOGLE_APPLICATION_CREDENTIALS
+            value: "/var/run/loki/secrets/gcs_cortex.json"
+        ports:
+        - containerPort: 3100
+        resources:
+          requests:
+            memory: "100Mi"
+            cpu: "0.01"
+        volumeMounts:
+          - name: config-volume
+            mountPath: /etc/loki
+          - name: secret-volume
+            mountPath: /var/run/loki/secrets 
+      volumes:  
+      - name: config-volume
+        configMap:
+          name: loki
+      - name: secret-volume
+        secret:
+          secretName: gcs-cortex

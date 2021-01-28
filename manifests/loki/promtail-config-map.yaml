@@ -1,0 +1,43 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: promtail-config
+data:
+  promtail.yaml: |
+    server:
+      http_listen_port: 9080
+      grpc_listen_port: 0
+
+    positions:
+      filename: /var/log/positions.yaml # This location needs to be writeable by promtail.
+
+    client:
+      url: http://distributor-loki.default.svc.cluster.local:3100/loki/api/v1/push
+      tenant_id: "0"
+
+    scrape_configs:
+    - job_name: 'kube'
+      kubernetes_sd_configs:
+      - role: endpoints
+      relabel_configs:
+      - source_labels: ['__meta_kubernetes_endpoint_address_target_kind']
+        regex: Pod
+        action: keep
+      - source_labels: ['__meta_kubernetes_pod_node_name']
+        target_label: '__host__'
+      - action: labelmap
+        regex: __meta_kubernetes_pod_label_(.+)
+      - source_labels: [__meta_kubernetes_namespace]
+        action: replace
+        target_label: kubernetes_namespace
+      - source_labels: [__meta_kubernetes_pod_name]
+        action: replace
+        target_label: kubernetes_pod_name
+      - source_labels: [__meta_kubernetes_namespace, __meta_kubernetes_pod_name, __meta_kubernetes_pod_uid]
+        separator: _
+        target_label: __tmp_intermediate_path
+      - source_labels: [__tmp_intermediate_path, __meta_kubernetes_pod_container_name]
+        replacement: /var/log/pods/$1/*.log
+        separator: /
+        action: replace 
+        target_label: __path__

@@ -1,0 +1,11 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: consul-loki
+spec:
+  ports:
+  - name: http
+    port: 8500
+  selector:
+    name: consul-loki
